@@ -1,35 +1,22 @@
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using RedRoomDemo.Database;
-using RedRoomDemo.Models;
+using RedRoomDemo.Services.Interfaces;
 
 namespace RedRoomDemo.Controllers;
 
 public class DashboardController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly IDashboardService _dashboardService;
 
-    public DashboardController(IConfiguration configuration)
+    public DashboardController(IDashboardService dashboardService)
     {
-        _configuration = configuration;
+        _dashboardService = dashboardService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        // Workshop purpose: intentionally keep SQL and aggregation logic in the controller
-        // to demonstrate legacy maintainability pain points.
-        using var connection = new SqliteConnection(LegacyDatabaseInitializer.GetConnectionString(_configuration));
-        connection.Open();
-
-        var model = new DashboardViewModel
-        {
-            CustomerCount = connection.ExecuteScalar<int>("SELECT COUNT(1) FROM Customers;"),
-            OrderCount = connection.ExecuteScalar<int>("SELECT COUNT(1) FROM Orders;"),
-            SuccessfulPaymentCount = connection.ExecuteScalar<int>(
-                "SELECT COUNT(1) FROM PaymentTransactions WHERE Status = 'Success';")
-        };
-
+        // The controller now focuses only on HTTP request handling.
+        // Business logic has been moved to the service layer.
+        var model = await _dashboardService.GetDashboardAsync();
         return View(model);
     }
 }

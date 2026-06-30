@@ -1,40 +1,22 @@
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using RedRoomDemo.Database;
-using RedRoomDemo.Models;
+using RedRoomDemo.Services.Interfaces;
 
 namespace RedRoomDemo.Controllers;
 
 public class CustomersController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly ICustomerService _customerService;
 
-    public CustomersController(IConfiguration configuration)
+    public CustomersController(ICustomerService customerService)
     {
-        _configuration = configuration;
+        _customerService = customerService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        // Workshop purpose: intentionally keep SQL, mapping, and view model assembly in the controller.
-        using var connection = new SqliteConnection(LegacyDatabaseInitializer.GetConnectionString(_configuration));
-        connection.Open();
-
-        const string sql = """
-                           SELECT
-                               c.CustomerId,
-                               c.Name,
-                               c.Email,
-                               COUNT(o.OrderId) AS OrderCount,
-                               COALESCE(SUM(o.TotalAmount), 0) AS TotalOrderAmount
-                           FROM Customers c
-                           LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
-                           GROUP BY c.CustomerId, c.Name, c.Email
-                           ORDER BY c.CustomerId;
-                           """;
-
-        var model = connection.Query<CustomerListItemViewModel>(sql).ToList();
+        // The controller now focuses only on HTTP request handling.
+        // Business logic has been moved to the service layer.
+        var model = await _customerService.GetCustomersAsync();
         return View(model);
     }
 }

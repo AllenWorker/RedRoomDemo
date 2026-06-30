@@ -1,4 +1,9 @@
 using RedRoomDemo.Database;
+using RedRoomDemo.Data.Database;
+using RedRoomDemo.Data.Repositories.Implementations;
+using RedRoomDemo.Data.Repositories.Interfaces;
+using RedRoomDemo.Services.Implementations;
+using RedRoomDemo.Services.Interfaces;
 
 namespace RedRoomDemo
 {
@@ -10,6 +15,18 @@ namespace RedRoomDemo
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Register application services and repositories with ASP.NET Core built-in DI container.
+            builder.Services.AddScoped<IDbConnectionFactory, SqliteConnectionFactory>();
+
+            builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
 
             // Workshop purpose: keep startup-time database initialization to simulate a common legacy pattern.
             LegacyDatabaseInitializer.Initialize(builder.Configuration);

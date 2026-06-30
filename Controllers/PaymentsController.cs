@@ -1,48 +1,28 @@
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using RedRoomDemo.Database;
-using RedRoomDemo.Models;
+using RedRoomDemo.Services.Interfaces;
 
 namespace RedRoomDemo.Controllers;
 
 public class PaymentsController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly IPaymentService _paymentService;
 
-    public PaymentsController(IConfiguration configuration)
+    public PaymentsController(IPaymentService paymentService)
     {
-        _configuration = configuration;
+        _paymentService = paymentService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        // Workshop purpose: intentionally keep query logic, matching decisions,
-        // and UI field composition inside the controller.
-        using var connection = new SqliteConnection(LegacyDatabaseInitializer.GetConnectionString(_configuration));
-        connection.Open();
+        // The controller now focuses only on HTTP request handling.
+        // Business logic has been moved to the service layer.
+        var payments = await _paymentService.GetPaymentsAsync();
+        return View(payments);
+    }
 
-        const string sql = """
-                           SELECT
-                               p.TransactionId,
-                               p.TransactionReference,
-                               p.PaidAmount,
-                               p.Status,
-                               p.CreatedAt,
-                               CASE
-                                   WHEN p.TransactionReference IS NULL OR TRIM(p.TransactionReference) = '' THEN 'Missing reference'
-                                   WHEN EXISTS (
-                                       SELECT 1
-                                       FROM Orders o
-                                       WHERE o.OrderNumber = p.TransactionReference
-                                   ) THEN 'Matched by OrderNumber'
-                                   ELSE 'No matching order'
-                               END AS MatchHint
-                           FROM PaymentTransactions p
-                           ORDER BY p.TransactionId DESC;
-                           """;
-
-        var payments = connection.Query<PaymentListItemViewModel>(sql).ToList();
+    public async Task<IActionResult> UnmatchedSuccessful()
+    {
+        var payments = await _paymentService.GetUnmatchedSuccessfulPaymentsAsync();
         return View(payments);
     }
 }
