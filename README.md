@@ -12,6 +12,7 @@ This repository is designed as a **branch-based workshop**.
 
 ```bash
 git checkout 01-messy-controller
+git checkout 01b-manual-service
 git checkout 02-service-layer-di
 git checkout 03-adapting-to-legacy-db
 ```
@@ -21,6 +22,7 @@ git checkout 03-adapting-to-legacy-db
 | Branch | Purpose |
 |---|---|
 | `01-messy-controller` | Shows a working but hard-to-maintain legacy-style MVC application where controllers contain SQL, business logic, and data access. |
+| `01b-manual-service` | Shows a first refactoring attempt where controllers call service classes and services call repositories, but dependencies are still manually created with `new`. |
 | `02-service-layer-di` | Introduces Service Layer, Repository Layer, and ASP.NET Core built-in Dependency Injection. |
 | `03-adapting-to-legacy-db` | Demonstrates adapting the application to a legacy database without changing the schema, using DTOs, manual mapping, and Dapper. |
 
