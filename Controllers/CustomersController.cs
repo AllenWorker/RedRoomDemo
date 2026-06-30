@@ -1,40 +1,23 @@
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using RedRoomDemo.Database;
-using RedRoomDemo.Models;
+using RedRoomDemo.Services;
 
 namespace RedRoomDemo.Controllers;
 
 public class CustomersController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly CustomerService _customerService;
 
-    public CustomersController(IConfiguration configuration)
+    // This controller no longer contains all business logic.
+    // However, it still manually creates CustomerService, so it is tightly coupled to a concrete class.
+    public CustomersController()
     {
-        _configuration = configuration;
+        // Problem: If CustomerService changes its constructor, every controller that creates it manually must be updated.
+        _customerService = new CustomerService();
     }
 
     public IActionResult Index()
     {
-        // Workshop purpose: intentionally keep SQL, mapping, and view model assembly in the controller.
-        using var connection = new SqliteConnection(LegacyDatabaseInitializer.GetConnectionString(_configuration));
-        connection.Open();
-
-        const string sql = """
-                           SELECT
-                               c.CustomerId,
-                               c.Name,
-                               c.Email,
-                               COUNT(o.OrderId) AS OrderCount,
-                               COALESCE(SUM(o.TotalAmount), 0) AS TotalOrderAmount
-                           FROM Customers c
-                           LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
-                           GROUP BY c.CustomerId, c.Name, c.Email
-                           ORDER BY c.CustomerId;
-                           """;
-
-        var model = connection.Query<CustomerListItemViewModel>(sql).ToList();
+        var model = _customerService.GetCustomers();
         return View(model);
     }
 }

@@ -1,48 +1,23 @@
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using RedRoomDemo.Database;
-using RedRoomDemo.Models;
+using RedRoomDemo.Services;
 
 namespace RedRoomDemo.Controllers;
 
 public class PaymentsController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly PaymentService _paymentService;
 
-    public PaymentsController(IConfiguration configuration)
+    // This controller no longer contains all business logic.
+    // However, it still manually creates PaymentService, so it is tightly coupled to a concrete class.
+    public PaymentsController()
     {
-        _configuration = configuration;
+        // Problem: If PaymentService changes its constructor, every controller that creates it manually must be updated.
+        _paymentService = new PaymentService();
     }
 
     public IActionResult Index()
     {
-        // Workshop purpose: intentionally keep query logic, matching decisions,
-        // and UI field composition inside the controller.
-        using var connection = new SqliteConnection(LegacyDatabaseInitializer.GetConnectionString(_configuration));
-        connection.Open();
-
-        const string sql = """
-                           SELECT
-                               p.TransactionId,
-                               p.TransactionReference,
-                               p.PaidAmount,
-                               p.Status,
-                               p.CreatedAt,
-                               CASE
-                                   WHEN p.TransactionReference IS NULL OR TRIM(p.TransactionReference) = '' THEN 'Missing reference'
-                                   WHEN EXISTS (
-                                       SELECT 1
-                                       FROM Orders o
-                                       WHERE o.OrderNumber = p.TransactionReference
-                                   ) THEN 'Matched by OrderNumber'
-                                   ELSE 'No matching order'
-                               END AS MatchHint
-                           FROM PaymentTransactions p
-                           ORDER BY p.TransactionId DESC;
-                           """;
-
-        var payments = connection.Query<PaymentListItemViewModel>(sql).ToList();
+        var payments = _paymentService.GetPayments();
         return View(payments);
     }
 }
