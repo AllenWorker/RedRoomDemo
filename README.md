@@ -1,22 +1,24 @@
 # RedRoomDemo
 
-## Branch: 02-service-layer-di
+## Branch: 03-adapting-to-legacy-db
 
-This branch demonstrates the first refactoring step from a messy controller-based legacy application into a more maintainable ASP.NET Core structure.
+This branch demonstrates how a modern ASP.NET Core application adapts to an existing production database that cannot be redesigned.
 
 It introduces:
 
-- Service Layer
-- Repository Layer
-- ASP.NET Core built-in Dependency Injection
-- Interface-based development
-- Separation of HTTP handling, business logic, and data access
+- DTOs as API contracts
+- Manual mapping in the service layer
+- REST API endpoints for partners (`/api/orders`, `/api/orders/{id}`, `/api/payments/unmatched`)
+- Business-oriented API shape independent from legacy schema details
+- Dapper-based SQL flexibility for legacy data adaptation
 
 It does **NOT** introduce yet:
 
 - Entity Framework Core
 - AutoMapper
-- Full Clean Architecture
+- CQRS / MediatR / Unit of Work / Generic Repository
 - Database schema redesign
 
-The legacy database problems are intentionally preserved for workshop teaching purposes. For example, `PaymentTransactions` still does not have `OrderId`, so payment matching still relies on imperfect `TransactionReference` to `OrderNumber` matching.
+The legacy database problems are intentionally preserved. For example, `PaymentTransactions` still does not have `OrderId`, so payment matching still relies on imperfect `TransactionReference` to `OrderNumber` matching.
+
+AutoMapper is intentionally not introduced yet, so the mapping process stays explicit and easy to teach in a workshop setting.

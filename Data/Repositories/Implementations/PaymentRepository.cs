@@ -1,5 +1,6 @@
 using Dapper;
 using RedRoomDemo.Data.Database;
+using RedRoomDemo.Data.Models;
 using RedRoomDemo.Data.Repositories.Interfaces;
 using RedRoomDemo.Models;
 
@@ -91,6 +92,36 @@ public class PaymentRepository : IPaymentRepository
 
         using var connection = _connectionFactory.CreateConnection();
         var results = await connection.QueryAsync<PaymentTransaction>(sql, new { OrderNumber = orderNumber });
+        return results.ToList();
+    }
+
+    public async Task<IReadOnlyList<UnmatchedSuccessfulPaymentDataModel>> GetUnmatchedSuccessfulPaymentRecordsAsync()
+    {
+        // The repository returns database-focused models from the legacy schema.
+        const string sql = """
+                           SELECT
+                               p.TransactionId,
+                               p.TransactionReference,
+                               p.PaidAmount,
+                               p.Status,
+                               p.CreatedAt
+                           FROM PaymentTransactions p
+                           WHERE p.Status = 'Success'
+                             AND (
+                                 p.TransactionReference IS NULL
+                                 OR TRIM(p.TransactionReference) = ''
+                                 OR NOT EXISTS
+                                 (
+                                     SELECT 1
+                                     FROM Orders o
+                                     WHERE o.OrderNumber = p.TransactionReference
+                                 )
+                             )
+                           ORDER BY p.TransactionId DESC;
+                           """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<UnmatchedSuccessfulPaymentDataModel>(sql);
         return results.ToList();
     }
 }

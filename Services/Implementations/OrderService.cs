@@ -1,3 +1,4 @@
+using RedRoomDemo.Application.DTOs.Order;
 using RedRoomDemo.Data.Repositories.Interfaces;
 using RedRoomDemo.Models;
 using RedRoomDemo.Services.Interfaces;
@@ -47,5 +48,40 @@ public class OrderService : IOrderService
         }
 
         return model;
+    }
+
+    public async Task<IReadOnlyList<OrderResponseDto>> GetOrderResponsesAsync()
+    {
+        // DTOs provide a stable contract independent of the database schema.
+        var records = await _orderRepository.GetOrdersWithPaymentStatusAsync();
+
+        // Manual mapping keeps transformation logic explicit for workshop teaching.
+        return records.Select(record => new OrderResponseDto
+        {
+            OrderNumber = record.OrderNumber,
+            CustomerName = record.CustomerName,
+            PaymentStatus = record.PaymentStatus ?? "No payment matched",
+            TotalAmount = record.TotalAmount,
+            HasMatchedPayment = record.HasMatchedPaymentInt == 1
+        }).ToList();
+    }
+
+    public async Task<OrderResponseDto?> GetOrderResponseAsync(int orderId)
+    {
+        var record = await _orderRepository.GetOrderWithPaymentStatusAsync(orderId);
+        if (record is null)
+        {
+            return null;
+        }
+
+        // Service transforms data models into business-friendly DTO contracts.
+        return new OrderResponseDto
+        {
+            OrderNumber = record.OrderNumber,
+            CustomerName = record.CustomerName,
+            PaymentStatus = record.PaymentStatus ?? "No payment matched",
+            TotalAmount = record.TotalAmount,
+            HasMatchedPayment = record.HasMatchedPaymentInt == 1
+        };
     }
 }
