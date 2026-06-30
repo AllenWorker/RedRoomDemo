@@ -1,3 +1,5 @@
+using RedRoomDemo.Database;
+
 namespace RedRoomDemo
 {
     public class Program
@@ -8,6 +10,9 @@ namespace RedRoomDemo
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Workshop purpose: keep startup-time database initialization to simulate a common legacy pattern.
+            LegacyDatabaseInitializer.Initialize(builder.Configuration);
 
             var app = builder.Build();
 

@@ -1,0 +1,41 @@
+@model RedRoomDemo.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Legacy Dashboard";
+}
+
+<h1 class="mb-4">Legacy Dashboard</h1>
+<p class="text-muted">This dashboard is intentionally simple and tightly coupled to controller queries for workshop demonstration.</p>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Customers</h5>
+                <p class="display-6 mb-0">@Model.CustomerCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Orders</h5>
+                <p class="display-6 mb-0">@Model.OrderCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Successful Payments</h5>
+                <p class="display-6 mb-0">@Model.SuccessfulPaymentCount</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a class="btn btn-outline-primary" asp-controller="Customers" asp-action="Index">View Customers</a>
+    <a class="btn btn-outline-primary" asp-controller="Orders" asp-action="Index">View Orders</a>
+    <a class="btn btn-outline-primary" asp-controller="Payments" asp-action="Index">View Payments</a>
+</div>

@@ -1,8 +1,15 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Legacy Workshop";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="p-4 bg-light rounded-3">
+    <h1 class="display-6">Legacy Enterprise Demo</h1>
+    <p class="lead mb-2">
+        This branch intentionally keeps controller-heavy, tightly coupled code to demonstrate
+        why maintainable architecture matters.
+    </p>
+    <p class="mb-0">
+        Go to the dashboard to explore customers, orders, and payment records with imperfect legacy data.
+    </p>
+    <a class="btn btn-primary mt-3" asp-controller="Dashboard" asp-action="Index">Open Dashboard</a>
 </div>
